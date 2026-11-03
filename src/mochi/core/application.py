@@ -6,7 +6,10 @@ from mochi.companion.pet_window import PetWindow
 
 from mochi.database.connection import Database
 from mochi.database.schema import initialise_database
+
 from mochi.services.task_service import TaskService
+from mochi.services.calendar_service import CalendarService
+from mochi.services.note_service import NoteService
 
 
 class MochiApplication:
@@ -22,9 +25,16 @@ class MochiApplication:
 
         # Create shared application services.
         self.task_service = TaskService(self.database)
+        self.calendar_service = CalendarService(self.database)
+        self.note_service = NoteService(self.database)
 
         # Create application windows.
-        self.workspace = MainWindow(self.task_service)
+        self.workspace = MainWindow(
+            self.task_service,
+            self.calendar_service,
+            self.note_service,
+        )
+
         self.companion = PetWindow()
 
         self.app.aboutToQuit.connect(self.database.close)

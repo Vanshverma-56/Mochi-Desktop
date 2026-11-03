@@ -21,10 +21,12 @@ from mochi.workspace.pages.settings_page import SettingsPage
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, task_service):
+    def __init__(self, task_service, calendar_service, note_service):
         super().__init__()
 
         self.task_service = task_service
+        self.calendar_service = calendar_service
+        self.note_service = note_service
 
         self.sidebar_expanded = True
         self.sidebar_expanded_width = 215
@@ -137,9 +139,9 @@ class MainWindow(QMainWindow):
                 self.task_service,
                 self.change_page,
             ),
-            "Calendar": CalendarPage(),
+            "Calendar": CalendarPage(self.calendar_service),
             "Tasks": TasksPage(self.task_service),
-            "Notes": NotesPage(),
+            "Notes": NotesPage(self.note_service),
             "Logbook": LogbookPage(),
             "Focus": FocusPage(),
             "Settings": SettingsPage(),
@@ -150,7 +152,7 @@ class MainWindow(QMainWindow):
         for page in self.pages.values():
             self.stack.addWidget(page)
 
-        # Navigation definitions: icon and page name
+        # Navigation definitions
         navigation = [
             ("⌂", "Dashboard"),
             ("▦", "Calendar"),
