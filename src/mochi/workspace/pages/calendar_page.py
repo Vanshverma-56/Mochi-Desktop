@@ -182,7 +182,7 @@ class EventDialog(QDialog):
     def __init__(self, parent=None, event=None, selected_date=None):
         super().__init__(parent)
 
-        self.event = event
+        self.event_item = event
 
         self.setWindowTitle("Edit Event" if event else "New Event")
         self.setMinimumWidth(440)
@@ -885,9 +885,9 @@ class CalendarPage(QWidget):
             return
 
         dialog = EventDialog(
-    parent=None,
-    selected_date=self.selected_date,
-)
+            parent=self,
+            selected_date=self.selected_date,
+        )
 
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
@@ -949,9 +949,9 @@ class CalendarPage(QWidget):
             return
 
         dialog = EventDialog(
-    parent=None,
-    event=event,
-)
+            parent=self,
+            event=event,
+        )
 
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
