@@ -1,277 +1,160 @@
-\# Mochi
+# Mochi
 
+**Mochi** is a Windows desktop productivity application built with Python and PySide6. It combines a personal productivity workspace with a floating desktop companion.
 
+**Project status:** Active development
+**Documentation updated:** 6 November 2026
 
-\*\*A customisable Windows desktop companion and productivity workspace.\*\*
+## Features
 
+### Dashboard
+- Productivity overview.
+- Analog clock with digital clock toggle.
+- Date display.
+- Foundation for future dashboard widgets and customisation.
 
+### Calendar
+- Calendar month navigation and date selection.
+- Create, edit and delete events.
+- Custom Mochi-styled event dialogs.
+- Input validation and past-date restrictions.
+- Fixed a native Windows crash caused by a Qt event-handler name collision.
+- Seven Calendar dialog regression tests.
+- Add Event flow manually confirmed in the original Windows application.
 
-Mochi is a Windows desktop productivity application built with Python and PySide6. It combines a floating desktop companion with a modular workspace for managing everyday activities.
+### Tasks
+- Create, view, edit and delete tasks.
+- Priorities, descriptions, categories and due dates.
+- Search by title, description and category.
+- Filter tasks into Upcoming, Pending, Completed and No Due Date.
+- Group tasks by due date and sort by priority.
+- Mark tasks complete and undo recent completion actions.
 
+### Notes
+- Create, view, edit and delete notes.
+- Note categories and search.
+- SQLite-backed persistence.
 
+### Floating Desktop Companion
+- Floating companion window foundation.
+- Further interactions and appearance customisation planned.
 
-\## Features
+### Additional Workspace Pages
+- **Daily Logbook:** Full workflows pending.
+- **Focus:** Timer and session tracking pending.
+- **Settings & Appearance:** Persistent settings and customisation pending.
 
+## Technology Stack
 
-
-\### Floating Desktop Companion
-
-\- Separate floating companion window.
-
-\- Designed to coexist with the main workspace.
-
-\- Foundation for future customisation and appearance options.
-
-
-
-\### Task Management
-
-\- Create, edit and delete tasks.
-
-\- Assign High, Medium and Low priorities.
-
-\- Add descriptions, categories and due dates.
-
-\- Search by title, description and category.
-
-\- Filter tasks into Upcoming, Pending, Completed and No Due Date.
-
-\- Group tasks by due date and sort by priority.
-
-\- Mark tasks complete and undo recent completion actions.
-
-
-
-\## Workspace
-
-
-
-| Section | Current status |
-
+| Technology | Purpose |
 |---|---|
+| Python 3.11+ | Application language |
+| PySide6 | Desktop GUI |
+| SQLite | Local database |
+| pytest | Automated testing |
+| psutil | System and process information |
 
-| Dashboard | Initial implementation |
+## Getting Started
 
-| Calendar | Planned |
+### Requirements
+- Windows 10 or Windows 11.
+- Python 3.11 or newer.
+- Git.
 
-| Tasks | Implemented |
-
-| Notes | Planned |
-
-| Daily Logbook | Planned |
-
-| Focus | Planned |
-
-| Settings \& Appearance | Planned |
-
-
-
-\## Technology Stack
-
-\- Python 3.11+
-
-\- PySide6
-
-\- SQLite
-
-\- pytest
-
-\- psutil
-
-
-
-\## Project Structure
-
-
-
-```text
-
-Widget/
-
-├── app.py
-
-├── pyproject.toml
-
-├── requirements.txt
-
-├── README.md
-
-├── CHANGELOG.md
-
-├── assets/
-
-├── docs/
-
-├── src/
-
-│   └── mochi/
-
-│       ├── appearance/
-
-│       ├── companion/
-
-│       ├── core/
-
-│       ├── database/
-
-│       ├── integrations/
-
-│       ├── services/
-
-│       ├── widgets/
-
-│       └── workspace/
-
-│           └── pages/
-
-└── tests/
-
-```
-
-
-
-\## Getting Started
-
-
-
-\### Requirements
-
-\- Windows
-
-\- Python 3.11 or newer
-
-\- Git
-
-
-
-\### Installation
-
-
+### Installation
 
 Clone the repository:
 
-
-
 ```powershell
-
 git clone https://github.com/Vanshverma-56/Mochi-Desktop.git
-
 cd Mochi-Desktop
-
 ```
-
-
 
 Create and activate a virtual environment:
 
-
-
 ```powershell
-
 py -3.11 -m venv .venv
-
-.\\.venv\\Scripts\\Activate.ps1
-
+.\.venv\Scripts\Activate.ps1
 ```
 
+If PowerShell blocks script activation, you can run the project without activating the environment by calling its Python executable directly. For example:
 
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\python.exe app.py
+.\.venv\Scripts\python.exe -m pytest -q
+```
+```
 
 Install dependencies:
 
-
-
 ```powershell
-
 python -m pip install --upgrade pip
-
 pip install -e .
-
 pip install pytest
-
 ```
 
-
-
-\### Run Mochi
-
-
+Run Mochi:
 
 ```powershell
-
 python app.py
-
 ```
 
+## Running Tests
 
-
-\### Run Tests
-
-
+Execute the full automated test suite:
 
 ```powershell
-
-python -m pytest -v
-
+python -m pytest -q
 ```
 
+Latest recorded result: **31 passed in 1.34s**, reported on 6 November 2026.
 
+The automated suite includes database, Task, Notes and Calendar tests, including seven Calendar dialog regression tests.
 
-\## Data Storage
+The Calendar Add Event flow was additionally confirmed manually in the original Windows application. This does not establish that every GUI workflow has been manually tested.
 
-
+## Data Storage
 
 Mochi uses a local SQLite database. Application data is stored in the operating system's application data directory rather than in the source repository.
 
+## Development Roadmap
 
+### Implemented
+- [x] Initial application and GUI foundation.
+- [x] SQLite database foundation.
+- [x] Task service and interface.
+- [x] Notes service and interface.
+- [x] Floating companion foundation.
+- [x] Dashboard and analog clock.
+- [x] Collapsible workspace sidebar.
+- [x] Calendar event management.
+- [x] Custom Calendar dialogs and validation.
+- [x] Calendar crash fix and regression tests.
 
-\## Development Roadmap
+### Planned / In Progress
+- [ ] Complete Daily Logbook workflows.
+- [ ] Implement Focus timer and session tracking.
+- [ ] Complete Settings and Appearance persistence.
+- [ ] Further Dashboard improvements.
+- [ ] Independent desktop widgets.
+- [ ] Companion interactions and customisation.
+- [ ] Broader manual GUI verification.
 
+## Project Documentation
 
+| Document | Purpose |
+|---|---|
+| `MOCHI_PROJECT_HANDBOOK.md` | Technical architecture, implementation details, decisions and testing. |
+| `MOCHI_PROJECT_GUIDE_AND_HANDOFF.md` | Development handoff and instructions for continuing the project. |
+| `CHANGELOG.md` | Chronological record of notable changes and fixes. |
 
-\- \[x] Initial application structure
+Keep these documents synchronised as the project evolves.
 
-\- \[x] SQLite database foundation
+## Repository
 
-\- \[x] Task management service
+[GitHub - Mochi Desktop](https://github.com/Vanshverma-56/Mochi-Desktop)
 
-\- \[x] Task management interface
+## License
 
-\- \[x] Floating companion window
-
-\- \[x] Initial dashboard
-
-\- \[ ] Collapsible workspace sidebar
-
-\- \[ ] Dashboard redesign and functional modules
-
-\- \[ ] Calendar and event management
-
-\- \[ ] Notes and scratchpad
-
-\- \[ ] Daily Logbook
-
-\- \[ ] Focus timer and session tracking
-
-\- \[ ] Settings and appearance customisation
-
-\- \[ ] Independent desktop widgets
-
-\- \[ ] Persistent companion customisation
-
-\- \[ ] Further automated tests and Windows integration
-
-
-
-\## Project Status
-
-
-
-Mochi is under active development. The current implementation establishes the desktop application foundation, floating companion, database architecture and task management functionality. Other workspace modules and independent widgets will be introduced progressively.
-
-
-
-\## License
-
-
-
-No open-source license has been added yet.
+No open-source license has currently been specified.
