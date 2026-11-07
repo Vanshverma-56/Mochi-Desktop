@@ -1,160 +1,324 @@
-# Mochi
+# Widget
 
-**Mochi** is a Windows desktop productivity application built with Python and PySide6. It combines a personal productivity workspace with a floating desktop companion.
+**Widget** is a Windows desktop productivity application with a separate floating virtual pet companion named **Mochi**.
 
-**Project status:** Active development
-**Documentation updated:** 6 November 2026
+The project combines a productivity workspace, independent desktop widgets, and a lightweight companion experience. Its core functionality is designed to work locally, without requiring AI services or paid APIs.
 
-## Features
+**GitHub repository:** `Vanshverma-56/Mochi-Desktop`
+
+---
+
+## 1. Project Vision
+
+Widget aims to bring everyday productivity tools and a virtual desktop companion together in one customisable Windows application.
+
+The main principles are:
+
+- **Offline-first:** Core features should work locally.
+- **Non-AI companion:** Mochi is a traditional virtual pet, not an AI assistant.
+- **Modular architecture:** Dashboard, desktop widgets, and Mochi Companion are separate components.
+- **Local data:** User information and application data are stored locally.
+- **No mandatory costs:** No paid APIs, subscriptions, paid service dependencies, or hidden ongoing costs.
+- **Expressive minimalism:** A warm, polished, customisable interface rather than a generic productivity dashboard.
+
+The application is actively being developed. Functional foundations come first; comprehensive UI refinement and visual polish will follow.
+
+## 2. Current Implementation Status
+
+### Implemented features
+
+| Component | Functionality |
+|---|---|
+| Application Launcher | Launch Dashboard, Desktop Widgets, Mochi Companion, or all components; exit Widget |
+| Dashboard | Main productivity workspace and navigation |
+| Tasks | Local task-management service and interface |
+| Calendar | Calendar events, event dialogs, and calendar service |
+| Notes | Local notes-management service and interface |
+| Daily Logbook | Daily entries backed by a dedicated service |
+| Focus | Focus sessions, Pomodoro-style timer, pause/resume/reset, and completion handling |
+| Focus Sounds | Offline sound options and sound-selection settings |
+| Mochi Companion | Separate floating virtual pet window |
+| Digital Clock | Independent floating clock displaying time and date |
+| System Monitor | Live CPU, RAM, and battery information |
+| Calendar Widget | Independent floating calendar connected to the calendar service |
+| Music Service | Local music metadata extraction and library-management foundation |
+| Music Playback | Local audio playback controller using Qt Multimedia |
+| Music Mini-player | Floating mini-player integrated into Desktop Widgets |
+| Database | SQLite storage for application data, preferences, and music-library structures |
+
+### Planned or incomplete features
+
+The following are future development tasks and should not be considered complete:
+
+- Full Music Library browsing and management interface.
+- More complete playlist and favourite workflows through the UI.
+- Persistent playback queue and playback-position restoration.
+- Windows media-session detection for music playing in other applications.
+- WASAPI loopback audio capture.
+- Local audio fingerprint matching against the user's music library.
+- Investigation of optional, genuinely free online song-recognition services.
+- More extensive desktop-widget resizing, positioning, and customisation.
+- Expanded appearance settings and wallpaper-aware styling.
+- Additional Mochi animations and behaviours.
+- Comprehensive UI consistency, accessibility, and interaction improvements.
+
+## 3. Application Components
+
+Widget currently has three main independently managed components.
 
 ### Dashboard
-- Productivity overview.
-- Analog clock with digital clock toggle.
-- Date display.
-- Foundation for future dashboard widgets and customisation.
 
-### Calendar
-- Calendar month navigation and date selection.
-- Create, edit and delete events.
-- Custom Mochi-styled event dialogs.
-- Input validation and past-date restrictions.
-- Fixed a native Windows crash caused by a Qt event-handler name collision.
-- Seven Calendar dialog regression tests.
-- Add Event flow manually confirmed in the original Windows application.
+The main productivity workspace.
 
-### Tasks
-- Create, view, edit and delete tasks.
-- Priorities, descriptions, categories and due dates.
-- Search by title, description and category.
-- Filter tasks into Upcoming, Pending, Completed and No Due Date.
-- Group tasks by due date and sort by priority.
-- Mark tasks complete and undo recent completion actions.
+Sections include:
 
-### Notes
-- Create, view, edit and delete notes.
-- Note categories and search.
-- SQLite-backed persistence.
+- Dashboard
+- Calendar
+- Tasks
+- Notes
+- Daily Logbook
+- Focus
+- Settings / Appearance
 
-### Floating Desktop Companion
-- Floating companion window foundation.
-- Further interactions and appearance customisation planned.
+### Desktop Widgets
 
-### Additional Workspace Pages
-- **Daily Logbook:** Full workflows pending.
-- **Focus:** Timer and session tracking pending.
-- **Settings & Appearance:** Persistent settings and customisation pending.
+A separate floating widget environment containing:
 
-## Technology Stack
+- Digital Clock
+- System Monitor
+- Calendar Widget
+- Music Mini-player
+
+These widgets are designed to remain separate from the main workspace.
+
+### Mochi Companion
+
+Mochi is the floating virtual pet companion.
+
+Mochi is intentionally non-AI. Future AI functionality, if ever introduced, must remain a separate optional helper and must not turn the pet itself into an AI assistant.
+
+### Application Launcher
+
+The launcher is the central starting point for the application.
+
+It provides access to:
+
+- Dashboard
+- Desktop Widgets
+- Mochi Companion
+- Launch All
+- Exit Widget
+
+The current launcher is a functional prototype and may be redesigned later.
+
+Widget does not currently require automatic Windows startup.
+
+## 4. Technology Stack
 
 | Technology | Purpose |
 |---|---|
 | Python 3.11+ | Application language |
-| PySide6 | Desktop GUI |
+| PySide6 | Desktop interface and Qt functionality |
 | SQLite | Local database |
+| Pillow | Image handling |
+| psutil | CPU, memory, and battery information |
+| Mutagen | Audio metadata extraction |
+| Qt Multimedia | Audio playback |
 | pytest | Automated testing |
-| psutil | System and process information |
 
-## Getting Started
+## 5. Project Structure
 
-### Requirements
-- Windows 10 or Windows 11.
-- Python 3.11 or newer.
-- Git.
+The project follows a modular structure.
 
-### Installation
+```text
+Widget/
+│
+├── app.py
+├── assets/
+│   └── sounds/
+│
+├── src/
+│   └── mochi/
+│       ├── appearance/
+│       ├── companion/
+│       ├── core/
+│       ├── database/
+│       ├── integrations/
+│       ├── services/
+│       ├── widgets/
+│       └── workspace/
+│           └── pages/
+│
+├── tests/
+│
+├── README.md
+├── CHANGELOG.md
+├── MOCHI_PROJECT_HANDBOOK.md
+├── MOCHI_PROJECT_GUIDE_AND_HANDOFF.md
+├── pyproject.toml
+└── requirements.txt
+```
 
-Clone the repository:
+### Main module responsibilities
+
+- `core/` — application lifecycle and launcher.
+- `database/` — SQLite connection and schema.
+- `services/` — application logic and data operations.
+- `workspace/` — main productivity window and pages.
+- `widgets/` — independent floating desktop widgets.
+- `companion/` — Mochi companion and Focus timer overlay.
+- `appearance/` — appearance-related functionality.
+- `integrations/` — external and Windows-specific integrations.
+- `tests/` — automated test suite.
+
+## 6. Development Environment
+
+The project is developed on Windows using:
+
+- Python 3.11.9
+- PySide6 6.12.0
+- Git
+- Visual Studio Code
+- PowerShell
+
+### Clone the repository
 
 ```powershell
 git clone https://github.com/Vanshverma-56/Mochi-Desktop.git
 cd Mochi-Desktop
 ```
 
-Create and activate a virtual environment:
+### Create a virtual environment
 
 ```powershell
 py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
 ```
 
-If PowerShell blocks script activation, you can run the project without activating the environment by calling its Python executable directly. For example:
+### Install dependencies
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -e .
-.\.venv\Scripts\python.exe app.py
-.\.venv\Scripts\python.exe -m pytest -q
-```
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Install dependencies:
+### Launch Widget
+
+From the project root:
 
 ```powershell
-python -m pip install --upgrade pip
-pip install -e .
-pip install pytest
+$env:PYTHONPATH = "$PWD\src"
+.\.venv\Scripts\python.exe .\app.py
 ```
 
-Run Mochi:
+### Run automated tests
 
 ```powershell
-python app.py
+$env:PYTHONPATH = "$PWD\src"
+.\.venv\Scripts\python.exe -m pytest tests\ -q
 ```
 
-## Running Tests
+**Latest verified test result:** 76 passed.
 
-Execute the full automated test suite:
+**Latest dependency check:** No broken requirements found.
 
-```powershell
-python -m pytest -q
-```
+These results reflect the latest recorded verification run, not a guarantee that every future change has been tested.
 
-Latest recorded result: **31 passed in 1.34s**, reported on 6 November 2026.
+## 7. Database and Data Storage
 
-The automated suite includes database, Task, Notes and Calendar tests, including seven Calendar dialog regression tests.
+Widget uses SQLite for local application data.
 
-The Calendar Add Event flow was additionally confirmed manually in the original Windows application. This does not establish that every GUI workflow has been manually tested.
+The database schema currently includes structures for:
 
-## Data Storage
+- Tasks
+- Calendar events
+- Notes
+- Logbook entries
+- Focus sessions
+- Preferences
+- Music tracks
+- Music playlists
+- Playlist-track relationships
 
-Mochi uses a local SQLite database. Application data is stored in the operating system's application data directory rather than in the source repository.
+Music imports reference the user's existing local audio files. Widget should not delete or modify original audio files when removing a track from its library.
 
-## Development Roadmap
+## 8. Music System Direction
 
-### Implemented
-- [x] Initial application and GUI foundation.
-- [x] SQLite database foundation.
-- [x] Task service and interface.
-- [x] Notes service and interface.
-- [x] Floating companion foundation.
-- [x] Dashboard and analog clock.
-- [x] Collapsible workspace sidebar.
-- [x] Calendar event management.
-- [x] Custom Calendar dialogs and validation.
-- [x] Calendar crash fix and regression tests.
+The Music System is intended to become a unified local music experience.
 
-### Planned / In Progress
-- [ ] Complete Daily Logbook workflows.
-- [ ] Implement Focus timer and session tracking.
-- [ ] Complete Settings and Appearance persistence.
-- [ ] Further Dashboard improvements.
-- [ ] Independent desktop widgets.
-- [ ] Companion interactions and customisation.
-- [ ] Broader manual GUI verification.
+Its planned capabilities include:
 
-## Project Documentation
+1. Importing supported local audio files.
+2. Searching tracks, artists, and albums.
+3. Playing, pausing, seeking, and changing volume.
+4. Previous/next track controls.
+5. Shuffle and repeat.
+6. Favourites and playlists.
+7. Persistent music-library data.
+8. A compact floating mini-player and expanded music interface.
+9. Detection of music playing in other Windows applications.
+
+For external music recognition, the intended order is:
+
+1. Check Windows media-session metadata.
+2. If metadata is unavailable, investigate WASAPI loopback audio capture.
+3. Compare audio fingerprints against the user's local music library.
+4. Investigate an optional free online recognition service only if a genuinely no-cost solution is feasible.
+
+An audio fingerprint alone cannot identify arbitrary unknown songs without a reference catalogue. Widget must report when it cannot identify a song rather than inventing a result.
+
+**Financial constraint:** The Music System must not introduce mandatory paid APIs, subscriptions, or hidden costs.
+
+## 9. Design Direction
+
+The intended design is expressive minimalism.
+
+Visual direction includes:
+
+- Warm neutrals.
+- Forest green.
+- Charcoal and navy.
+- Muted teal.
+- Dusty pink.
+- Brown.
+- Restrained gold accents.
+- Rounded modular cards.
+- Clear contrast between light and dark surfaces.
+- Independent widget appearances.
+- Optional wallpaper-aware styling.
+
+The current interface is a functional prototype. Existing working functionality should be preserved while the design is gradually refined.
+
+## 10. Development Principles
+
+Future development should follow these rules:
+
+- Keep modules focused and understandable.
+- Separate business logic from UI code.
+- Use services for database operations.
+- Preserve existing working features.
+- Add tests for new service and database functionality.
+- Avoid unnecessary refactoring.
+- Keep the application offline-first.
+- Do not introduce paid APIs or hidden costs.
+- Keep Mochi non-AI.
+- Clearly distinguish implemented features from planned features.
+- Update the handbook and handoff guide when architecture or project status changes.
+
+## 11. Project Documentation
 
 | Document | Purpose |
 |---|---|
-| `MOCHI_PROJECT_HANDBOOK.md` | Technical architecture, implementation details, decisions and testing. |
-| `MOCHI_PROJECT_GUIDE_AND_HANDOFF.md` | Development handoff and instructions for continuing the project. |
-| `CHANGELOG.md` | Chronological record of notable changes and fixes. |
+| `README.md` | Overview, current features, setup, and development principles |
+| `CHANGELOG.md` | Development history and notable changes |
+| `MOCHI_PROJECT_HANDBOOK.md` | Technical architecture and implementation reference |
+| `MOCHI_PROJECT_GUIDE_AND_HANDOFF.md` | Project context, current status, and continuation instructions |
 
-Keep these documents synchronised as the project evolves.
+---
 
-## Repository
+**Project status:** Active development.
 
-[GitHub - Mochi Desktop](https://github.com/Vanshverma-56/Mochi-Desktop)
+**Application name:** Widget.
 
-## License
+**Virtual companion:** Mochi.
 
-No open-source license has currently been specified.
+**Repository:** Mochi-Desktop.
