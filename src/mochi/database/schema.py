@@ -59,6 +59,57 @@ def initialise_database(database):
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS music_tracks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_path TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL,
+            artist TEXT DEFAULT 'Unknown Artist',
+            album TEXT DEFAULT 'Unknown Album',
+            duration_seconds REAL DEFAULT 0,
+            genre TEXT DEFAULT '',
+            track_number INTEGER,
+            year INTEGER,
+            artwork_path TEXT,
+            file_size INTEGER,
+            date_added TEXT NOT NULL,
+            is_favorite INTEGER NOT NULL DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS music_playlists (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            description TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS music_playlist_tracks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            playlist_id INTEGER NOT NULL,
+            track_id INTEGER NOT NULL,
+            position INTEGER NOT NULL DEFAULT 0,
+            added_at TEXT NOT NULL,
+            FOREIGN KEY (playlist_id)
+                REFERENCES music_playlists(id)
+                ON DELETE CASCADE,
+            FOREIGN KEY (track_id)
+                REFERENCES music_tracks(id)
+                ON DELETE CASCADE,
+            UNIQUE (playlist_id, track_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_music_tracks_title
+            ON music_tracks(title);
+
+        CREATE INDEX IF NOT EXISTS idx_music_tracks_artist
+            ON music_tracks(artist);
+
+        CREATE INDEX IF NOT EXISTS idx_music_tracks_album
+            ON music_tracks(album);
+
+        CREATE INDEX IF NOT EXISTS idx_music_playlist_tracks_order
+            ON music_playlist_tracks(playlist_id, position);
         """
     )
 

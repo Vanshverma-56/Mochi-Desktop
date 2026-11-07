@@ -23,6 +23,9 @@ def test_database_initialises_required_tables(tmp_path):
             "logbook_entries",
             "focus_sessions",
             "preferences",
+            "music_tracks",
+            "music_playlists",
+            "music_playlist_tracks",
         }
 
         assert expected_tables.issubset(table_names)

@@ -10,7 +10,8 @@ requires-python = ">=3.11"
 dependencies = [
     "PySide6==6.12.0",
     "Pillow",
-    "psutil"
+    "psutil",
+    "mutagen==1.48.1"
 ]
 
 [tool.setuptools.packages.find]
