@@ -1,297 +1,951 @@
-# Mochi Project Handbook
+# Widget — Technical Project Handbook
 
-**Technical source of truth — updated 4 November 2026**  
-**Project:** Mochi Desktop · **Version:** 0.1.0 · **Platform target:** Windows
+**Document type:** Technical source of truth
+**Application:** Widget
+**Virtual companion:** Mochi
+**GitHub repository:** `Vanshverma-56/Mochi-Desktop`
+**Platform:** Windows
+**Language:** Python 3.11+
+**Interface framework:** PySide6
+**Storage:** SQLite
+**Development status:** Active development
 
-## 1\. Purpose and product boundaries
+---
 
-Mochi is a Windows desktop productivity application paired with a separate floating virtual-pet companion. The workspace is intended to provide a calm, polished home for everyday planning and reflection.
+# 1. Project Overview
 
-The pet/ordinary productivity experience is **not AI-powered**. A separately scoped, optional AI helper has been discussed as a future feature; it is not present in this source snapshot and must not be represented as implemented. Core app features must remain usable without an internet connection.
+Widget is a Windows desktop productivity application with three independently managed components:
 
-Product direction recorded in the project discussions:
+1. **Dashboard** — the main productivity workspace.
+2. **Desktop Widgets** — independent floating desktop tools.
+3. **Mochi Companion** — a separate floating virtual pet.
 
-* A customizable virtual pet, not restricted to a cat.
-* A small independent companion window and a separate full workspace.
-* An uncluttered, expressive-minimalist interface with warm neutrals, forest green, charcoal, navy, muted teal, dusty pink, brown and restrained gold.
-* Planned workspace areas: Dashboard, Calendar, Tasks, Notes, Daily Logbook, Focus, Settings and Appearance.
-* Future independent desktop widgets and appearance/customization options.
-* Any future AI helper must be optional and clearly separated from the non-AI pet/productivity experience. Do not silently capture screens or send app data; user-selected context and explicit consent are required. Do not add paid API dependencies or paid fallbacks without explicit approval.
+The application is designed to be modular, locally functional, and customisable.
 
-These are product requirements/directions, not proof that each feature exists in this code snapshot.
+The core application does not require AI services. Mochi is explicitly a non-AI virtual pet.
 
-## 2\. Repository and snapshot provenance
+The project prioritises functional implementation before comprehensive visual redesign and polish.
 
-* Repository: https://github.com/Vanshverma-56/Mochi-Desktop
-* Branch reported by the developer: `main`
-* Local Windows working directory reported by the developer: `C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\VANSH\\\\\\\\\\\\\\\\Documents\\\\\\\\\\\\\\\\Projects\\\\\\\\\\\\\\\\Widget`
-* Source delivered for this handoff: `Mochi\\\\\\\\\\\\\\\_Source\\\\\\\\\\\\\\\_For\\\\\\\\\\\\\\\_Handoff.zip`, generated with `git archive` from `HEAD`.
-* The archive is a source snapshot, not a Git bundle. It does **not** contain `.git`, commit objects, branches, remotes or reflog. Use the GitHub repository for history.
-* The working tree was reported clean immediately before archive creation.
+## 1.1 Core design principles
 
-Known pushed history, newest first (as reported by the developer):
+- Offline-first functionality.
+- Local data storage.
+- Modular application architecture.
+- Separation of UI and business logic.
+- Independent management of desktop components.
+- Custom application dialogs and controls.
+- No mandatory paid APIs, subscriptions, or hidden ongoing costs.
+- Mochi remains non-AI.
+- Preserve working functionality when implementing new features.
 
-|Commit|Subject|
-|-|-|
-| `e609e52` | Fix Calendar dialog Qt event collision (local, not yet pushed) |
-|`6fde62d`|Integrate calendar and notes into workspace|
-|`bd3e82f`|Redesign dashboard and add analog clock|
-|`dde2f73`|Implement notes management interface|
-|`ea9c293`|Implement calendar management interface|
-|`cf8f1c7`|Add notes service tests|
-|`6447cd7`|Add notes service|
-|`f963fec`|Add calendar service tests|
-|`bff9097`|Add calendar event service|
-|`dd6341e`|Add animated collapsible sidebar navigation|
-|`75e4380`|Initial commit: establish Mochi desktop application foundation|
+## 1.2 Current development philosophy
 
-The archive itself cannot independently verify this history because `.git` is excluded.
+The current interface is a working prototype, not the final design.
 
-## 3\. Technology and setup
+The intended development order is:
 
-Declared project metadata (`pyproject.toml`):
+1. Complete the planned functional foundations.
+2. Verify integration and application lifecycle.
+3. Improve visual consistency and usability.
+4. Refine appearance, interactions, and customisation.
+5. Consider packaging and distribution.
 
-* Python `>=3.11`
-* PySide6 pinned to `6.12.0`
-* Pillow
-* psutil
-* setuptools build backend
-* pytest configured with `src` on `pythonpath` and `tests` as the test directory.
+Avoid treating prototype UI decisions as permanent design requirements.
 
-`requirements.txt` additionally lists pytest. Installation through the project metadata installs runtime dependencies; install pytest separately if needed.
+---
 
-### Windows PowerShell setup
+# 2. Application Architecture
 
-```powershell
-cd "$env:USERPROFILE\\\\\\\\\\\\\\\\Documents\\\\\\\\\\\\\\\\Projects\\\\\\\\\\\\\\\\Widget"
-py -3.11 -m venv .venv
-.\\\\\\\\\\\\\\\\.venv\\\\\\\\\\\\\\\\Scripts\\\\\\\\\\\\\\\\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -e .
-python -m pip install pytest
-```
+## 2.1 High-level structure
 
-If the project is freshly cloned:
-
-```powershell
-git clone https://github.com/Vanshverma-56/Mochi-Desktop.git
-cd Mochi-Desktop
-```
-
-Run:
-
-```powershell
-python app.py
-```
-
-Test:
-
-```powershell
-python -m pytest -q
-```
-
-The source archive does not contain the virtual environment. Do not copy `.venv` between machines.
-
-## 4\. Source layout in this snapshot
-
-```text
-.
-├── app.py
-├── pyproject.toml
-├── requirements.txt
-├── README.md
-├── CHANGELOG.md
-├── src/
-│   └── mochi/
-│       ├── appearance/
-│       ├── companion/
-│       │   └── pet\\\\\\\\\\\\\\\_window.py
-│       ├── core/
-│       │   └── application.py
-│       ├── database/
-│       │   ├── connection.py
-│       │   └── schema.py
-│       ├── integrations/
-│       │   └── windows/
-│       ├── services/
-│       │   ├── calendar\\\\\\\\\\\\\\\_service.py
-│       │   ├── note\\\\\\\\\\\\\\\_service.py
-│       │   └── task\\\\\\\\\\\\\\\_service.py
-│       ├── widgets/
-│       └── workspace/
-│           ├── main\\\\\\\\\\\\\\\_window.py
-│           └── pages/
-│               ├── calendar\\\\\\\\\\\\\\\_page.py
-│               ├── dashboard\\\\\\\\\\\\\\\_page.py
-│               ├── focus\\\\\\\\\\\\\\\_page.py
-│               ├── logbook\\\\\\\\\\\\\\\_page.py
-│               ├── notes\\\\\\\\\\\\\\\_page.py
-│               ├── section\\\\\\\\\\\\\\\_page.py
-│               ├── settings\\\\\\\\\\\\\\\_page.py
-│               └── tasks\\\\\\\\\\\\\\\_page.py
-├── tests/
-│   ├── test\\\\\\\\\\\\\\\_calendar\\\\\\\\\\\\\\\_dialog.py
-│   ├── test\\\\\\\\\\\\\\\_calendar\\\\\\\\\\\\\\\_service.py
-│   ├── test\\\\\\\\\\\\\\\_database.py
-│   ├── test\\\\\\\\\\\\\\\_note\\\\\\\\\\\\\\\_service.py
-│   └── test\\\\\\\\\\\\\\\_task\\\\\\\\\\\\\\\_service.py
-├── test\\\\\\\\\\\\\\\_database.py
-└── test\\\\\\\\\\\\\\\_task\\\\\\\\\\\\\\\_service.py
-```
-
-Some packages/directories are currently placeholders. Their presence does not mean the associated functionality is complete.
-
-## 5\. Application startup and architecture
-
-`app.py` imports `MochiApplication`, constructs it and exits with `application.run()`.
-
-`src/mochi/core/application.py`:
-
-1. Reuses an existing `QApplication` or creates one.
-2. Sets application and organization names to `Mochi`.
-3. Creates `Database` and calls `initialise\\\\\\\\\\\\\\\_database`.
-4. Creates shared `TaskService`, `CalendarService` and `NoteService`.
-5. Creates `MainWindow` with those services and creates `PetWindow`.
-6. Connects application shutdown to `database.close`.
-7. Shows workspace and companion, then enters the Qt event loop.
-
-`MainWindow` builds a stacked workspace with sidebar navigation for Dashboard, Calendar, Tasks, Notes, Logbook, Focus and Settings. It includes a collapsible/animated sidebar. Dashboard, Calendar, Tasks and Notes receive their corresponding services. Logbook, Focus and Settings pages are instantiated without services in this snapshot.
-
-The service layer performs SQLite persistence. UI pages call the relevant service; keep business validation and persistence out of presentation code when extending the application.
-
-## 6\. Database
-
-`Database` uses `QStandardPaths.StandardLocation.AppLocalDataLocation`, creates that directory, and stores the database as `mochi.db` within it. The exact resolved Windows path depends on Qt's application/organization path resolution on the machine. The SQLite connection is lazily created, uses `sqlite3.Row`, and enables foreign keys. It is shared by the services and closed on application shutdown.
-
-`initialise\\\\\\\\\\\\\\\_database` creates these tables if absent:
-
-* `tasks`: title, description, priority, category, due date, completion flag, created/updated timestamps.
-* `calendar\\\\\\\\\\\\\\\_events`: title, description, start/end datetimes, category, created timestamp.
-* `notes`: title, content, category, created/updated timestamps.
-* `logbook\\\\\\\\\\\\\\\_entries`: entry date, title, content, created/updated timestamps.
-* `focus\\\\\\\\\\\\\\\_sessions`: start/end, duration minutes, session type, completed flag.
-* `preferences`: key/value.
-
-The schema is an initial schema creation script; no migration framework is present in this snapshot. Make schema changes backward-compatible or introduce explicit migrations. Do not delete the user's existing `mochi.db` as a debugging shortcut.
-
-## 7\. Implemented functionality — source inspection
-
-### Companion
-
-`src/mochi/companion/pet\\\\\\\\\\\\\\\_window.py` provides a separate companion window. The source snapshot establishes its presence; full customization, pet selection and a complete interaction/animation system are not verified here.
-
-### Tasks
-
-`TaskService` supports create, retrieve, list, update, delete and completion state. It validates non-empty titles and priorities in `Low`, `Medium`, `High`. The Tasks page is present and the README describes search, filtering, due-date grouping and completion undo. GUI behavior should still be manually checked after changes.
-
-### Calendar
-
-`CalendarService` supports create, retrieve, list, range query, update and delete. It validates a non-empty title, ISO-formatted start/end values and end-after-start when an end value is supplied.
-
-`CalendarPage` includes month/date navigation, event listing, date highlighting, add/edit/delete flows, custom Mochi dialogs, category selection and restrictions on adding/editing events on past dates. The `EventDialog` uses `QDateTimeEdit` controls with calendar popups.
-
-**Resolved blocking defect — Calendar dialog native Windows access violation:**
-Previously, launching the GUI and entering the Calendar add-event flow caused a native Windows access violation:
-
-```text
-Windows fatal exception: access violation
-
-Current thread 0x0000a3cc (most recent call first):
-  File "src/mochi/workspace/pages/calendar\\\\\\\\\\\\\\\_page.py", line 187 in \\\\\\\\\\\\\\\_\\\\\\\\\\\\\\\_init\\\\\\\\\\\\\\\_\\\\\\\\\\\\\\\_
-  File "src/mochi/workspace/pages/calendar\\\\\\\\\\\\\\\_page.py", line 887 in add\\\\\\\\\\\\\\\_event
-```
-
-**Investigation and Root Cause:**
-
-* The crash was reproduced and isolated under Python `faulthandler` during `EventDialog` construction.
-* Controlled experiments established that the crash was caused by assigning `self.event = event` in `EventDialog.\\\\\\\\\\\\\\\_\\\\\\\\\\\\\\\_init\\\\\\\\\\\\\\\_\\\\\\\\\\\\\\\_`.
-* `QObject` defines an `event()` method used throughout Qt's event handling. Assigning `self.event = event` shadowed that method name on the dialog instance, causing a collision with the Qt/PySide6 event-handling interface when `self.setWindowTitle(...)` was invoked.
-* Because the collision occurred in the native Qt / PySide6 interface layer rather than ordinary Python code, Windows raised a fatal native access violation (`0xC0000005`) instead of an ordinary Python exception.
-* Renaming the instance attribute to `self.event\\\\\\\\\\\\\\\_item` eliminated the collision, allowing the dialog to construct and initialize cleanly without crashing.
-
-**Resolution:**
-
-* Renamed `self.event` to `self.event\\\\\\\\\\\\\\\_item` inside `EventDialog.\\\\\\\\\\\\\\\_\\\\\\\\\\\\\\\_init\\\\\\\\\\\\\\\_\\\\\\\\\\\\\\\_` to prevent collision with `QObject.event()`.
-* Updated `EventDialog` construction in both `CalendarPage.add\\\\\\\\\\\\\\\_event` and `edit\\\\\\\\\\\\\\\_selected\\\\\\\\\\\\\\\_event` to use `parent=self` instead of `parent=None`, establishing consistent modal parenting and proper window hierarchy matching other Mochi pages.
-* The fix was strictly confined to `src/mochi/workspace/pages/calendar\\\\\\\\\\\\\\\_page.py` and verified through new dedicated regression tests in `tests/test\\\\\\\\\\\\\\\_calendar\\\\\\\\\\\\\\\_dialog.py`.
-
-### Notes
-
-`NoteService` supports create, retrieve, list, search, update and delete. Service search checks title, content and category. `NotesPage` and its editor dialog are present; the developer previously reported that the Notes page worked well in manual use. The current source should still be manually rechecked. Compare UI search behavior with service behavior: do not accidentally narrow or change search semantics.
+Widget is organised into three main application components.
 
 ### Dashboard
 
-`DashboardPage` includes a redesigned dashboard, metrics/progress areas, today's tasks/upcoming deadlines and Calendar/Notes shortcuts. It includes a custom `AnalogClock` drawn with `QPainter`, with a one-second update mechanism and digital toggle. Dashboard display and clock toggling were verified using automated Qt test harnesses; interactive mouse-driven testing has not been performed.
+The main productivity workspace contains:
 
-### Logbook, Focus, Settings
+- Dashboard
+- Calendar
+- Tasks
+- Notes
+- Daily Logbook
+- Focus
+- Settings / Appearance
 
-Page modules exist and are wired into navigation, but the current `MainWindow` constructs them without persistence/service dependencies. Do not describe full logbook entry management, focus-session tracking or settings persistence as complete until code and manual tests demonstrate it.
+The workspace uses a main window with navigation between pages.
 
-## 8\. Automated test status
+### Desktop Widgets
 
-The automated test suite was executed in the Windows environment (`Python 3.11.9`, `PySide6 6.12.0`, `pytest 9.2.0`).
+A separate floating widget environment currently contains:
 
-### Latest Reported Test Results
+- Digital Clock
+- System Monitor
+- Calendar Widget
+- Music Mini-player
 
-* **Full test suite (`pytest tests/`)**: **31 passed** (latest reported: 31 passed in 1.34s).
-* **Original test files (`tests/test\\\\\\\\\\\\\\\_calendar\\\\\\\\\\\\\\\_service.py`, `tests/test\\\\\\\\\\\\\\\_database.py`, `tests/test\\\\\\\\\\\\\\\_note\\\\\\\\\\\\\\\_service.py`, `tests/test\\\\\\\\\\\\\\\_task\\\\\\\\\\\\\\\_service.py`)**: **24 passed** (latest reported: 24 passed in 0.53s).
-* **Zero existing tests modified or removed**: all original service and database assertions remain completely untouched.
+These widgets are separate windows managed through the Desktop Widgets interface.
 
-These figures represent the results of the latest reported test run in this Windows environment, not an invariant guarantee that every environment or machine will yield identical execution timing.
+The intended behaviour is that widgets can remain independently visible even when the widget-management window is hidden.
 
-### Dedicated Calendar Dialog Regression Suite
+### Mochi Companion
 
-The test file `tests/test\\\\\\\\\\\\\\\_calendar\\\\\\\\\\\\\\\_dialog.py` was introduced to prevent regressions in Calendar dialog instantiation and event validation:
+Mochi is a separate floating pet window.
 
-* **New Event dialog construction**: verifies clean construction with `parent=None` and `selected\\\\\\\\\\\\\\\_date`.
-* **Edit Event dialog construction**: verifies clean construction with `parent=None` and pre-populated event dictionaries.
-* **Parented construction**: verifies dialog construction when parented to a `CalendarPage` widget (`parent=self`).
-* **Temporary database path fixture verification**: The `calendar\\\\\\\\\\\\\\\_service` test fixture explicitly overrides `database.database\\\\\\\\\\\\\\\_path` with pytest's `tmp\\\\\\\\\\\\\\\_path / "test\\\\\\\\\\\\\\\_calendar.db"` before database initialization or connection. A dedicated test (`test\\\\\\\\\\\\\\\_calendar\\\\\\\\\\\\\\\_service\\\\\\\\\\\\\\\_fixture\\\\\\\\\\\\\\\_isolation`) specifically verifies that this fixture configures `database\\\\\\\\\\\\\\\_path` to the temporary path rather than the default `mochi.db` path; this test verifies that fixture's path configuration without asserting broader guarantees across all possible database operations.
-* **Empty-title validation**: verifies that submitting an event with whitespace/empty title halts acceptance and raises a user warning.
-* **Invalid time-range validation**: verifies that submitting an event where `end\\\\\\\\\\\\\\\_datetime <= start\\\\\\\\\\\\\\\_datetime` halts acceptance and raises a user warning.
-* **Successful submission**: verifies that valid title and times trigger `self.accept()` and return expected event data.
+It should remain independent from the productivity workspace and should not become an AI assistant.
 
-The project root also contains `test\\\\\\\\\\\\\\\_database.py` and `test\\\\\\\\\\\\\\\_task\\\\\\\\\\\\\\\_service.py`; these are standalone manual inspection scripts from initial development that run against the active database rather than pytest fixtures.
+## 2.2 Application launcher
 
-### GUI Verification Levels and Limitations
+**Source:** `src/mochi/core/launcher.py`
 
-Automated Qt/PySide6 programmatic test harnesses in the local Windows environment reportedly verified the application lifecycle (`MochiApplication`), Calendar operations (month navigation, date selection, past-date restrictions, event add/edit/delete flows), Dashboard components (analog clock, digital toggle, date display), Tasks and Notes lifecycles, and companion window initialization.
-**Verification limitation:** Most reported GUI checks were conducted through automated Qt event loops and Python test scripts. The developer subsequently launched the original Windows application and manually confirmed that the Calendar Add Event flow works after the fix. This manual confirmation does not establish that every Calendar workflow or other GUI feature has been manually tested.
+The launcher provides the initial application control interface.
 
-## 9\. Current status matrix
+It provides access to:
 
-|Area|Source status|Verification status|
-|-|-|-|
-|Python/PySide6 app startup|Implemented|Verified via automated harness (app launches without native crash; workspace and companion display)|
-|SQLite database/schema|Implemented|Verified via automated harness (automated tests passing; isolated temporary DB used in fixture tests)|
-|Floating companion window|Implemented foundation|Foundation verified present and independently displayed via automated harness|
-|Tasks service/UI|Implemented|Automated tests passing; GUI task lifecycle verified via automated harness|
-| Calendar service/UI | Implemented | Service and dialog tests passing; GUI operations verified through automated harness; Add Event flow additionally confirmed manually by the developer |
-|Notes service/UI|Implemented|Service tests passing; note creation/refresh verified via automated harness|
-|Dashboard/analog clock|Implemented|Verified via automated harness (analog/digital clock toggle, date rendering, shortcuts verified)|
-|Logbook|Page placeholder/foundation|Not verified as functional|
-|Focus|Page placeholder/foundation|Not verified as functional|
-|Settings/appearance|Page placeholder/foundation|Not verified as functional|
-|Independent widgets|Directories/future scope|Not implemented/verified|
-|AI helper|Future product discussion only|Not implemented|
+- Launch Dashboard
+- Launch Desktop Widgets
+- Launch Mochi Companion
+- Launch All
+- Exit Widget
 
-## 10\. Engineering rules for future work
+The launcher communicates with the application controller and reflects component status.
 
-* Preserve working functionality and the current visual direction.
-* Make the smallest evidence-based change that solves the task; avoid broad refactors.
-* Inspect the actual source and runtime versions before diagnosing platform-specific behavior.
-* Keep UI, services and database responsibilities separated.
-* Use parameterized SQL.
-* Validate user input in services as well as in the UI where appropriate.
-* Do not silently discard, reset or migrate user data.
-* Do not claim an operation succeeded until persistence succeeds.
-* Add/update tests for service and database changes.
-* Manually verify Qt GUI interactions on Windows; pytest alone is insufficient.
-* Update this handbook and `MOCHI\\\\\\\\\\\\\\\_PROJECT\\\\\\\\\\\\\\\_GUIDE\\\\\\\\\\\\\\\_AND\\\\\\\\\\\\\\\_HANDOFF.md` together whenever architecture, setup, requirements, status or known defects change.
-* Keep the README and CHANGELOG aligned with actual implementation.
-* Do not commit or push new changes unless the developer explicitly authorizes it.
+The current launcher is functional but remains a prototype. Its visual design and some interactions can be improved later.
 
-## 11\. Immediate technical priority
+## 2.3 Application lifecycle
 
-The blocking Calendar native Windows access violation has been diagnosed and resolved. The full automated test suite passes (31 tests). Automated regression checks cover Dashboard, Tasks, Notes, Calendar, and the companion window. The developer also manually confirmed that the Calendar Add Event flow works in the original Windows application.
+**Source:** `src/mochi/core/application.py`
 
+`MochiApplication` coordinates application startup, services, windows, and shutdown.
+
+Its responsibilities include:
+
+- Initialising the Qt application.
+- Creating the SQLite database.
+- Initialising database tables.
+- Instantiating application services.
+- Creating the music playback controller.
+- Creating the main workspace.
+- Creating the Mochi companion.
+- Creating the Focus timer controller and floating overlay.
+- Creating the Desktop Widgets window.
+- Creating the application launcher.
+- Coordinating shutdown.
+
+The application controller is the central integration point. New independent components should be connected here rather than creating unrelated application entry points.
+
+### Lifecycle considerations
+
+- Hiding a component is not necessarily equivalent to shutting it down.
+- The launcher should remain available while the application is running.
+- Closing a workspace window should not accidentally terminate unrelated floating components.
+- The explicit Exit Widget action should shut down the complete application.
+- Active timers and audio playback should be stopped or cleaned up appropriately during full shutdown.
+- Database connections must be closed cleanly.
+
+The application currently does not require automatic Windows startup.
+
+---
+
+# 3. Source Code Structure
+
+The current source layout is:
+
+```text
+Widget/
+│
+├── app.py
+│
+├── assets/
+│   └── sounds/
+│       ├── default.wav
+│       ├── chime.wav
+│       ├── alert.wav
+│       └── gentle.wav
+│
+├── src/
+│   └── mochi/
+│       │
+│       ├── appearance/
+│       │
+│       ├── companion/
+│       │   └── pomodoro.py
+│       │
+│       ├── core/
+│       │   ├── application.py
+│       │   └── launcher.py
+│       │
+│       ├── database/
+│       │   ├── connection.py
+│       │   └── schema.py
+│       │
+│       ├── integrations/
+│       │   └── windows/
+│       │
+│       ├── services/
+│       │   ├── calendar_service.py
+│       │   ├── focus_service.py
+│       │   ├── logbook_service.py
+│       │   ├── music_player.py
+│       │   ├── music_service.py
+│       │   ├── note_service.py
+│       │   └── task_service.py
+│       │
+│       ├── widgets/
+│       │   ├── calendar_widget.py
+│       │   ├── clock_widget.py
+│       │   ├── desktop_widgets.py
+│       │   ├── music_mini_player.py
+│       │   └── system_monitor.py
+│       │
+│       └── workspace/
+│           ├── main_window.py
+│           └── pages/
+│               ├── calendar_page.py
+│               ├── dashboard_page.py
+│               ├── focus_page.py
+│               ├── logbook_page.py
+│               ├── notes_page.py
+│               ├── section_page.py
+│               ├── settings_page.py
+│               └── tasks_page.py
+│
+├── tests/
+│
+├── README.md
+├── CHANGELOG.md
+├── MOCHI_PROJECT_HANDBOOK.md
+├── MOCHI_PROJECT_GUIDE_AND_HANDOFF.md
+├── pyproject.toml
+└── requirements.txt
+```
+
+This is the current conceptual layout. Check the actual repository before relying on the tree for newly added modules.
+
+## 3.1 Module responsibilities
+
+| Module | Responsibility |
+|---|---|
+| `core/` | Application startup, lifecycle, and launcher |
+| `database/` | SQLite connection and schema |
+| `services/` | Business logic and data operations |
+| `workspace/` | Main productivity window |
+| `workspace/pages/` | Individual productivity pages |
+| `widgets/` | Independent floating desktop widgets |
+| `companion/` | Mochi companion-related functionality and floating timer |
+| `appearance/` | Appearance-related functionality |
+| `integrations/` | Platform-specific integrations |
+| `assets/` | Local sound and other application assets |
+| `tests/` | Automated tests |
+
+---
+
+# 4. Database Architecture
+
+## 4.1 Database implementation
+
+**Files:**
+- `src/mochi/database/connection.py`
+- `src/mochi/database/schema.py`
+
+Widget uses SQLite for persistent local data.
+
+The database is initialised by the application during startup.
+
+The database location is managed through Qt application-data location handling rather than requiring a database file to be committed to Git.
+
+Local databases are excluded from version control.
+
+## 4.2 Database structures
+
+The current schema includes the following data areas.
+
+| Table | Purpose |
+|---|---|
+| `tasks` | Task records |
+| `calendar_events` | Calendar events |
+| `notes` | Notes |
+| `logbook_entries` | Daily Logbook entries |
+| `focus_sessions` | Focus session history |
+| `preferences` | Application preferences |
+| `music_tracks` | Imported music metadata |
+| `music_playlists` | User playlists |
+| `music_playlist_tracks` | Playlist-to-track relationships |
+
+The music schema also defines indexes for commonly searched music fields and playlist ordering.
+
+### Music table details
+
+`music_tracks` stores information such as:
+
+- Track ID
+- File path
+- Title
+- Artist
+- Album
+- Duration
+- Genre
+- Track number
+- Year
+- Artwork path
+- File size
+- Date added
+- Favourite status
+
+`music_playlists` stores playlist identity and descriptive information.
+
+`music_playlist_tracks` stores playlist membership and ordering, with foreign-key relationships and cascading deletion of relationship records.
+
+### Database rules
+
+- Use parameterised SQL queries.
+- Keep database operations inside services or database modules.
+- Do not place SQL business logic directly inside UI widgets.
+- Use transactions where multiple related operations must succeed together.
+- Preserve foreign-key integrity.
+- Avoid deleting original user files when removing database records.
+- Keep schema changes compatible with existing user databases.
+
+**Important:** The schema has been extended during development. Before introducing future schema changes, inspect the current initialisation and migration behaviour. Do not assume that changing the table-creation script automatically migrates an existing database.
+
+---
+
+# 5. Service Layer
+
+Services contain application logic and database operations.
+
+They should remain independent of the presentation layer wherever practical.
+
+## 5.1 TaskService
+
+**Source:** `src/mochi/services/task_service.py`
+
+Responsible for task-related operations.
+
+The Tasks page uses this service rather than implementing database operations itself.
+
+## 5.2 CalendarService
+
+**Source:** `src/mochi/services/calendar_service.py`
+
+Responsible for calendar-event operations.
+
+It is shared by the Calendar workspace and the floating Calendar Widget.
+
+This allows both interfaces to operate on the same calendar data.
+
+## 5.3 NoteService
+
+**Source:** `src/mochi/services/note_service.py`
+
+Responsible for Notes data operations.
+
+The Notes workspace uses this service for local notes management.
+
+## 5.4 LogbookService
+
+**Source:** `src/mochi/services/logbook_service.py`
+
+Responsible for Daily Logbook data operations.
+
+The Logbook page uses the service to manage daily entries and persistent storage.
+
+The Logbook functionality has been implemented and manually checked.
+
+## 5.5 FocusService
+
+**Source:** `src/mochi/services/focus_service.py`
+
+Responsible for Focus session data and persistence.
+
+It supports the Focus workspace and records session information in the database.
+
+The Focus service is separate from the floating timer presentation.
+
+## 5.6 MusicService
+
+**Source:** `src/mochi/services/music_service.py`
+
+Responsible for the local music library.
+
+Current responsibilities include:
+
+- Supported audio-format handling.
+- Local file import.
+- Folder import.
+- Metadata extraction using Mutagen.
+- Duplicate detection.
+- Track listing.
+- Searching.
+- Removing library records.
+- Favourite status.
+- Playlist creation and management.
+- Adding and removing tracks from playlists.
+- Playlist ordering.
+
+Removing a track from the Widget library should remove its library record, not delete the user's original audio file.
+
+The complete Music Library interface has not yet been implemented.
+
+---
+
+# 6. Focus and Pomodoro System
+
+## 6.1 Focus workspace
+
+**Source:** `src/mochi/workspace/pages/focus_page.py`
+
+The Focus page provides the user interface for starting and managing focus sessions.
+
+Current functionality includes:
+
+- Starting a session.
+- Pausing a session.
+- Resuming a session.
+- Resetting a session.
+- Completing a session.
+- Displaying session state.
+- Recording session information through FocusService.
+
+The session duration can be configured.
+
+The current implementation uses Focus as the session type rather than exposing a separate session-mode selection.
+
+## 6.2 Floating timer
+
+**Source:** `src/mochi/companion/pomodoro.py`
+
+The floating timer provides an independent timer overlay.
+
+It is designed to remain accessible when the main workspace is minimised or hidden.
+
+The controller and overlay coordinate timer state and visual updates.
+
+Current manually checked behaviour includes:
+
+- Timer start.
+- Pause and resume.
+- Reset.
+- Starting again after reset.
+- Completion handling.
+- Completion sound playback.
+
+## 6.3 Focus sounds
+
+**Assets:** `assets/sounds/`
+
+The project includes four offline sound choices:
+
+- `default.wav`
+- `chime.wav`
+- `alert.wav`
+- `gentle.wav`
+
+Settings allow selection and preview of the available sounds.
+
+These sounds are bundled local assets, so playback does not require an online service.
+
+---
+
+# 7. Daily Logbook
+
+**Files:**
+- `src/mochi/services/logbook_service.py`
+- `src/mochi/workspace/pages/logbook_page.py`
+
+The Daily Logbook is a productivity section for recording daily entries.
+
+Its service handles persistent data operations, while the page handles presentation and interaction.
+
+The feature has been implemented and manually checked.
+
+Future improvements should preserve existing entries and avoid unnecessary changes to the underlying data model.
+
+---
+
+# 8. Desktop Widgets
+
+## 8.1 DesktopWidgetsWindow
+
+**Source:** `src/mochi/widgets/desktop_widgets.py`
+
+This is the management interface for the floating desktop widgets.
+
+It coordinates the creation, visibility, and shutdown of the widget windows.
+
+Current integrated components:
+
+- ClockWidget
+- SystemMonitorWidget
+- CalendarWidget
+- MusicMiniPlayerWidget
+
+The window displays component status and provides controls to show or hide the individual widgets.
+
+The Desktop Widgets interface and its card styling are still prototypes.
+
+## 8.2 Digital Clock
+
+**Source:** `src/mochi/widgets/clock_widget.py`
+
+The Digital Clock is an independent floating window.
+
+Current behaviour includes:
+
+- Live time display.
+- Date display.
+- Periodic updates.
+- Dragging.
+- Hiding and showing.
+- Independent visibility from the widget-management window.
+
+## 8.3 System Monitor
+
+**Source:** `src/mochi/widgets/system_monitor.py`
+
+Uses `psutil` to display:
+
+- CPU usage.
+- RAM utilisation.
+- Battery percentage.
+- Battery charging information.
+
+The monitor updates periodically.
+
+A fallback is provided when battery information is unavailable.
+
+## 8.4 Calendar Widget
+
+**Source:** `src/mochi/widgets/calendar_widget.py`
+
+The floating Calendar Widget uses the shared CalendarService.
+
+Its current functionality includes:
+
+- Monthly navigation.
+- Date selection.
+- Event listing.
+- Event counts.
+- Adding events.
+- Editing events.
+- Deleting events.
+- Refreshing calendar data.
+- Hiding and showing the widget.
+
+It communicates changes through signals so that the workspace calendar can refresh.
+
+The Calendar Widget is functional but requires further visual and interaction refinement.
+
+---
+
+# 9. Music System
+
+The Music System is intended to become a complete local music experience rather than only a small playback control.
+
+Its current implementation provides the foundation for local library management and playback.
+
+## 9.1 MusicService
+
+**Source:** `src/mochi/services/music_service.py`
+
+Handles local music metadata and library operations.
+
+Supported extensions currently include:
+
+- MP3
+- WAV
+- FLAC
+- M4A
+- AAC
+- OGG
+- OPUS
+- AIFF
+- AIF
+- APE
+- WV
+- TTA
+- DSF
+- DFF
+
+Actual playback compatibility depends on the installed Qt Multimedia backend and available codecs. A format being accepted for metadata extraction does not guarantee playback on every Windows installation.
+
+Mutagen is used for audio metadata extraction.
+
+## 9.2 MusicPlaybackController
+
+**Source:** `src/mochi/services/music_player.py`
+
+Uses Qt Multimedia components:
+
+- `QMediaPlayer`
+- `QAudioOutput`
+
+The controller provides:
+
+- Track queue management.
+- Current track selection.
+- Play.
+- Pause.
+- Stop.
+- Toggle playback.
+- Next track.
+- Previous track.
+- Seek.
+- Volume.
+- Mute.
+- Shuffle.
+- Repeat modes: off, all, and one.
+- Playback-state signals.
+- Track and position signals.
+- Playback error signals.
+
+The controller is instantiated and integrated through the application lifecycle.
+
+## 9.3 Music Mini-player
+
+**Source:** `src/mochi/widgets/music_mini_player.py`
+
+The floating mini-player provides:
+
+- Track title.
+- Artist.
+- Progress slider.
+- Elapsed and total time.
+- Previous.
+- Play/pause.
+- Next.
+- Volume control.
+- Music Library button.
+- Dragging.
+- Hiding and showing.
+
+The mini-player is integrated into Desktop Widgets.
+
+The Music Library button currently provides an interface entry point, but the complete Music Library window is not yet implemented.
+
+## 9.4 Music System roadmap
+
+The following functionality remains incomplete:
+
+1. Full Music Library browsing interface.
+2. Track, artist, and album browsing.
+3. Complete playlist and favourite workflows through the UI.
+4. Persistent playback queue.
+5. Playback-position restoration.
+6. Windows media-session metadata detection.
+7. WASAPI loopback capture.
+8. Audio fingerprint generation and local catalogue matching.
+9. Evaluation of optional free online recognition services.
+
+## 9.5 External music recognition limitations
+
+The intended recognition approach is:
+
+1. Read Windows media-session metadata where available.
+2. If metadata is unavailable, investigate system-audio capture through WASAPI loopback.
+3. Compare captured audio fingerprints against the user's own local library.
+4. Investigate an optional free online recognition service only if a genuinely no-cost solution is available.
+
+Audio fingerprinting does not identify arbitrary unknown music by itself. It requires a reference catalogue or recognition database.
+
+If no match is available, Widget must report that the song could not be identified.
+
+### Financial constraints
+
+The project must not introduce:
+
+- Mandatory paid APIs.
+- Paid recognition subscriptions.
+- Paid service dependencies.
+- Hidden ongoing charges.
+- Unapproved usage-based billing.
+
+If a feature cannot be implemented under these constraints, explain the limitation instead of silently introducing a paid service.
+
+---
+
+# 10. Mochi Companion
+
+**Source:** `src/mochi/companion/`
+
+Mochi is a separate floating virtual pet.
+
+Its intended purpose is to provide a lightweight desktop companion experience.
+
+### Non-negotiable design rule
+
+Mochi itself must never use AI.
+
+Any future AI helper must be a separate, optional application component. It must not be required for the pet, productivity tools, or core application.
+
+The companion's visual behaviour, animations, customisation, and interaction model may be improved later.
+
+Preserve its independence from the main workspace.
+
+---
+
+# 11. Settings and Appearance
+
+**Source:** `src/mochi/workspace/pages/settings_page.py`
+
+The Settings page currently includes application settings and Focus sound selection/preview.
+
+Appearance is an area for future development.
+
+The intended design direction is expressive minimalism:
+
+- Warm neutrals.
+- Forest green.
+- Charcoal.
+- Navy.
+- Muted teal.
+- Dusty pink.
+- Brown.
+- Restrained gold.
+- Rounded modular surfaces.
+- Clear light/dark contrast.
+
+Future work may include wallpaper-aware styling and more comprehensive customisation.
+
+Do not assume that the current prototype styling is final.
+
+---
+
+# 12. Calendar Dialog Regression
+
+**Source:** `src/mochi/workspace/pages/calendar_page.py`
+
+A previous Windows crash was caused by assigning event data to:
+
+`self.event`
+
+This collided with the inherited Qt `QObject.event()` method.
+
+The event data is now stored as:
+
+`self.event_item`
+
+The dialog also uses the intended parent relationship.
+
+Regression coverage is included in:
+
+`tests/test_calendar_dialog.py`
+
+**Do not reintroduce `self.event` as an instance data attribute in Qt objects.**
+
+---
+
+# 13. Dependencies and Environment
+
+## 13.1 Current dependencies
+
+The project uses:
+
+| Dependency | Purpose |
+|---|---|
+| `PySide6==6.12.0` | Desktop interface and Qt functionality |
+| `Pillow` | Image processing |
+| `pytest` | Automated testing |
+| `psutil` | System information |
+| `mutagen==1.48.1` | Audio metadata |
+
+Qt Multimedia is provided through the installed PySide6 distribution.
+
+Python requirement: **Python 3.11 or newer**.
+
+## 13.2 Virtual environment
+
+The development environment uses:
+
+```powershell
+.\.venv\Scripts\python.exe
+```
+
+Prefer this executable for project commands to avoid accidentally using another Python installation.
+
+## 13.3 Launch command
+
+From the project root:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+.\.venv\Scripts\python.exe .\app.py
+```
+
+## 13.4 Test command
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+.\.venv\Scripts\python.exe -m pytest tests\ -q
+```
+
+## 13.5 Dependency verification
+
+```powershell
+.\.venv\Scripts\python.exe -m pip check
+```
+
+---
+
+# 14. Testing
+
+The project uses pytest.
+
+The test suite includes coverage for:
+
+- Calendar service.
+- Calendar dialog.
+- Calendar Widget.
+- Database schema.
+- Focus service.
+- Logbook service.
+- Music service.
+- Notes service.
+- Task service.
+
+### Latest recorded verification
+
+| Check | Result |
+|---|---|
+| Full automated test suite | 76 passed |
+| Test duration | 5.05 seconds |
+| Dependency check | No broken requirements found |
+
+These results are the latest recorded baseline as of 7 November 2026.
+
+### Manual verification reported
+
+The user has manually checked:
+
+- Launcher startup and component launching.
+- Dashboard access.
+- Desktop Widgets access.
+- Mochi Companion access.
+- Focus timer controls and completion.
+- Focus sound playback.
+- Daily Logbook operation.
+- Digital Clock.
+- System Monitor.
+- Calendar event flow.
+- Music mini-player visibility and basic integration.
+- Desktop Widget card button labels.
+
+Manual checks are not a substitute for regression testing after code changes.
+
+### Development testing rules
+
+After modifying application code:
+
+1. Run the relevant targeted tests.
+2. Run the full test suite.
+3. Check application startup when integration code changes.
+4. Manually verify affected GUI behaviour where practical.
+5. Check `pip check` after dependency changes.
+6. Record meaningful test results in the handoff documentation.
+
+---
+
+# 15. Git and Repository Management
+
+**Repository:** `Vanshverma-56/Mochi-Desktop`
+**Primary branch:** `main`
+
+The project uses Git for version control.
+
+### Git hygiene
+
+Do not commit:
+
+- `.venv/`
+- Python cache files.
+- Local SQLite database files.
+- Environment secrets.
+- Temporary `.bak` files.
+- Temporary `.backup` files.
+- Local test audio files.
+- One-off development scripts.
+- Generated temporary files.
+
+Keep actual application assets such as the Focus sound files under version control.
+
+Use meaningful commits grouped by feature or logical change.
+
+Before pushing:
+
+1. Inspect `git status`.
+2. Inspect the staged diff.
+3. Run tests.
+4. Confirm temporary files are excluded.
+5. Push the intended commits to `origin/main`.
+
+Never overwrite existing project work or reset user changes without explicit permission.
+
+---
+
+# 16. Known Limitations and Deferred Work
+
+The following are known development areas, not necessarily bugs.
+
+| Area | Remaining work |
+|---|---|
+| Launcher | Visual redesign and interaction refinement |
+| Dashboard | Comprehensive visual and usability improvements |
+| Calendar Widget | UI polish and additional refinement |
+| Desktop Widgets | More customisation and sizing options |
+| Music | Full library UI and persistent playback |
+| Music recognition | Media sessions, WASAPI, fingerprint matching, optional free service investigation |
+| Settings | More complete appearance controls |
+| Mochi | More animations and companion interactions |
+| Application | Broader integration and lifecycle testing |
+| Distribution | Packaging and installer work |
+
+Do not treat these as completed features.
+
+---
+
+# 17. Recommended Development Workflow
+
+When starting a new task:
+
+1. Read this handbook.
+2. Read `MOCHI_PROJECT_GUIDE_AND_HANDOFF.md`.
+3. Inspect the relevant existing source files.
+4. Understand the current implementation before modifying it.
+5. Preserve existing working behaviour.
+6. Make focused changes.
+7. Add or update tests.
+8. Run the full test suite.
+9. Manually verify relevant GUI behaviour.
+10. Update README, CHANGELOG, and handoff documentation when project status changes.
+11. Commit changes in meaningful groups when authorised.
+
+Avoid unnecessary refactoring while implementing a feature.
+
+Prefer understandable, maintainable code over overly complicated abstractions.
+
+---
+
+# 18. Final Project Rules
+
+These requirements apply to future development:
+
+1. The desktop application is named **Widget**.
+2. The floating pet is named **Mochi**.
+3. The GitHub repository remains **Mochi-Desktop**.
+4. Mochi is strictly non-AI.
+5. Core functionality should remain offline-first.
+6. Do not introduce mandatory paid APIs, subscriptions, or hidden costs.
+7. Do not delete or modify users' original music files when managing library records.
+8. Preserve existing working functionality.
+9. Keep services, UI, and database responsibilities separated.
+10. Distinguish completed features from planned features.
+11. Treat the current UI as a prototype until comprehensive refinement is completed.
+12. Keep technical documentation current as architecture changes.
+
+---
+
+**End of Technical Handbook**
+
+**Last documented baseline:** 7 November 2026
+**Automated tests:** 76 passed
+**Dependency health:** Clean
+**Development status:** Active
