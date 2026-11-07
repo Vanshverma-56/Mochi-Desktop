@@ -1,5 +1,6 @@
 
 from PySide6.QtWidgets import (
+    QApplication,
     QMainWindow,
     QWidget,
     QVBoxLayout,
@@ -9,7 +10,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QStackedWidget,
 )
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QEvent
 
 from mochi.workspace.pages.dashboard_page import DashboardPage
 from mochi.workspace.pages.calendar_page import CalendarPage
@@ -21,12 +22,25 @@ from mochi.workspace.pages.settings_page import SettingsPage
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, task_service, calendar_service, note_service):
+    def __init__(
+    self,
+    task_service,
+    calendar_service,
+    note_service,
+    logbook_service,
+    focus_service,
+    pomodoro,
+    floating_timer,
+):
         super().__init__()
 
         self.task_service = task_service
         self.calendar_service = calendar_service
         self.note_service = note_service
+        self.logbook_service = logbook_service
+        self.focus_service = focus_service
+        self.pomodoro = pomodoro
+        self.floating_timer = floating_timer
 
         self.sidebar_expanded = True
         self.sidebar_expanded_width = 215
@@ -142,9 +156,9 @@ class MainWindow(QMainWindow):
             "Calendar": CalendarPage(self.calendar_service),
             "Tasks": TasksPage(self.task_service),
             "Notes": NotesPage(self.note_service),
-            "Logbook": LogbookPage(),
-            "Focus": FocusPage(),
-            "Settings": SettingsPage(),
+            "Logbook": LogbookPage(self.logbook_service),
+            "Focus": FocusPage(self.focus_service, self.pomodoro),
+            "Settings": SettingsPage(self.pomodoro),
         }
 
         self.stack = QStackedWidget()
@@ -256,6 +270,17 @@ class MainWindow(QMainWindow):
         self.sidebar_animation.setEndValue(target_width)
         self.sidebar_animation.start()
 
+    def closeEvent(self, event):
+        # Closing the Dashboard hides it.
+        # The launcher and other components remain active.
+        event.accept()
+
+    def refresh_calendar(self):
+        """Refresh the workspace Calendar from the shared service."""
+        calendar_page = self.pages["Calendar"]
+        calendar_page.refresh_calendar()
+        calendar_page.refresh_event_list()
+
     def change_page(self, page_name):
         if page_name not in self.pages:
             return
@@ -263,6 +288,9 @@ class MainWindow(QMainWindow):
         selected_page = self.pages[page_name]
 
         self.stack.setCurrentWidget(selected_page)
+
+        if page_name == "Calendar":
+            self.refresh_calendar()
 
         for name, button in self.nav_buttons.items():
             button.setChecked(name == page_name)
